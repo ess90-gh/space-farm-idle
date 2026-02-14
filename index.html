@@ -1,187 +1,61 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fazenda Espacial Ociosa</title>
+let money = 20020.04;
+let production = 16;
+let upgradeCost = 183;
 
-<style>
-body{
-    margin:0;
-    font-family:Arial, sans-serif;
-    background:#0b0f1a;
-    color:#ffffff;
-    text-align:center;
-}
+const maxOfflineHours = 2;
 
-.container{
-    padding:20px;
-}
-
-h1{
-    font-weight:300;
-    margin-top:10px;
-}
-
-.money{
-    font-size:28px;
-    margin:20px 0;
-}
-
-.dome{
-    width:200px;
-    height:200px;
-    margin:20px auto;
-    border-radius:50%;
-    background:radial-gradient(circle at top, #4fd1ff, #1c3a5f);
-    box-shadow:0 0 40px #00d9ff55;
-    position:relative;
-}
-
-.dome:after{
-    content:"";
-    position:absolute;
-    bottom:30px;
-    left:50%;
-    transform:translateX(-50%);
-    width:120px;
-    height:40px;
-    background:#1c3a5f;
-    border-radius:20px;
-}
-
-button{
-    padding:12px 20px;
-    border:none;
-    border-radius:12px;
-    font-size:16px;
-    margin:10px;
-    cursor:pointer;
-}
-
-.primary{
-    background:#00d9ff;
-    color:#000;
-}
-
-.secondary{
-    background:#1c3a5f;
-    color:#fff;
-}
-
-.footer{
-    margin-top:40px;
-    font-size:12px;
-    opacity:0.6;
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-    <h1>🌍 Fazenda Espacial</h1>
-
-    <div class="money">
-        Créditos: R$ <span id="money">0.00</span>
-    </div>
-
-    <div>Produção por segundo: <span id="pps">0.5</span></div>
-
-    <div class="dome"></div>
-
-    <button class="primary" onclick="harvest()">
-        🌱 Produzir
-    </button>
-
-    <br>
-
-    <button class="secondary" onclick="upgrade()">
-        ⬆ Melhorar Produção (R$ <span id="upgradeCost">15</span>)
-    </button>
-
-    <div class="footer">
-        Economia estratégica ativada<br>
-        Offline até 2 horas
-    </div>
-</div>
-
-<script>
-let money = 0;
-let production = 1;
-let upgradeCost = 15;
-let lastTime = Date.now();
-
-function format(value){
+function formatMoney(value) {
     return value.toFixed(2);
 }
 
-function saveGame(){
-    localStorage.setItem("spaceFarmSave", JSON.stringify({
-        money,
-        production,
-        upgradeCost,
-        lastTime
-    }));
-}
-
-function loadGame(){
-    let save = localStorage.getItem("spaceFarmSave");
-    if(save){
-        let data = JSON.parse(save);
-        money = data.money;
-        production = data.production;
-        upgradeCost = data.upgradeCost;
-        lastTime = data.lastTime;
-    }
-}
-
-function updateUI(){
-    document.getElementById("money").innerText = format(money);
+function updateUI() {
+    document.getElementById("money").innerText = formatMoney(money);
+    document.getElementById("production").innerText = production.toFixed(2);
     document.getElementById("upgradeCost").innerText = Math.floor(upgradeCost);
-    document.getElementById("pps").innerText = format(production * 0.5);
 }
 
-function harvest(){
-    money += production;
+function produce() {
+    money += 1;
     updateUI();
-    saveGame();
 }
 
-function upgrade(){
-    if(money >= upgradeCost){
+function upgrade() {
+    if (money >= upgradeCost) {
         money -= upgradeCost;
-        production += 1; // crescimento linear
-        upgradeCost *= 1.6; // custo escala mais rápido
+
+        // Crescimento estratégico
+        production += 0.8;
+
+        // Custo cresce forte (progressivo)
+        upgradeCost *= 1.85;
+
         updateUI();
-        saveGame();
     }
 }
 
-function autoProduction(){
-    let now = Date.now();
-    let seconds = (now - lastTime) / 1000;
-    let maxOffline = 7200;
-    if(seconds > maxOffline){
-        seconds = maxOffline;
+// Produção automática mais controlada
+setInterval(() => {
+    money += production * 0.35;
+    updateUI();
+}, 1000);
+
+// Sistema Offline
+window.onload = function () {
+    const lastTime = localStorage.getItem("lastTime");
+
+    if (lastTime) {
+        const now = Date.now();
+        const diff = (now - lastTime) / 1000;
+        const maxOfflineSeconds = maxOfflineHours * 3600;
+
+        const offlineTime = Math.min(diff, maxOfflineSeconds);
+
+        money += production * 0.35 * offlineTime;
     }
-    money += (production * 0.5) * seconds;
-    lastTime = now;
+
     updateUI();
-    saveGame();
-}
+};
 
-setInterval(function(){
-    money += production * 0.5;
-    updateUI();
-    saveGame();
-},1000);
-
-window.onload = function(){
-    loadGame();
-    autoProduction();
-}
-</script>
-
-</body>
-</html>
+window.onbeforeunload = function () {
+    localStorage.setItem("lastTime", Date.now());
+};
