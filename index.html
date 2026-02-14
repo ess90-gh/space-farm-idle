@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fazenda Espacial Ociosa</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#0b0f1a;
+    color:#ffffff;
+    text-align:center;
+}
+
+.container{
+    padding:20px;
+}
+
+h1{
+    font-weight:300;
+    margin-top:10px;
+}
+
+.money{
+    font-size:28px;
+    margin:20px 0;
+}
+
+.dome{
+    width:200px;
+    height:200px;
+    margin:20px auto;
+    border-radius:50%;
+    background:radial-gradient(circle at top, #4fd1ff, #1c3a5f);
+    box-shadow:0 0 40px #00d9ff55;
+    position:relative;
+}
+
+.dome:after{
+    content:"";
+    position:absolute;
+    bottom:30px;
+    left:50%;
+    transform:translateX(-50%);
+    width:120px;
+    height:40px;
+    background:#1c3a5f;
+    border-radius:20px;
+}
+
+button{
+    padding:12px 20px;
+    border:none;
+    border-radius:12px;
+    font-size:16px;
+    margin:10px;
+    cursor:pointer;
+}
+
+.primary{
+    background:#00d9ff;
+    color:#000;
+}
+
+.secondary{
+    background:#1c3a5f;
+    color:#fff;
+}
+
+.footer{
+    margin-top:40px;
+    font-size:12px;
+    opacity:0.6;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>🌍 Fazenda Espacial</h1>
+
+    <div class="money">
+        Créditos: R$ <span id="money">0.00</span>
+    </div>
+
+    <div class="dome"></div>
+
+    <button class="primary" onclick="harvest()">
+        🌱 Produzir
+    </button>
+
+    <br>
+
+    <button class="secondary" onclick="upgrade()">
+        ⬆ Melhorar Produção (R$ <span id="upgradeCost">10</span>)
+    </button>
+
+    <div class="footer">
+        Produção automática ativada<br>
+        Offline até 2 horas
+    </div>
+</div>
+
+<script>
+let money = 0;
+let production = 1;
+let upgradeCost = 10;
+let lastTime = Date.now();
+
+function format(value){
+    return value.toFixed(2);
+}
+
+function updateUI(){
+    document.getElementById("money").innerText = format(money);
+    document.getElementById("upgradeCost").innerText = upgradeCost;
+}
+
+function harvest(){
+    money += production;
+    updateUI();
+}
+
+function upgrade(){
+    if(money >= upgradeCost){
+        money -= upgradeCost;
+        production *= 2;
+        upgradeCost = Math.floor(upgradeCost * 1.8);
+        updateUI();
+    }
+}
+
+function autoProduction(){
+    let now = Date.now();
+    let seconds = (now - lastTime) / 1000;
+    let maxOffline = 7200; // 2 horas
+    if(seconds > maxOffline){
+        seconds = maxOffline;
+    }
+    money += production * seconds;
+    lastTime = now;
+    updateUI();
+}
+
+setInterval(function(){
+    money += production;
+    updateUI();
+},1000);
+
+window.onload = function(){
+    autoProduction();
+}
+</script>
+
+</body>
+</html>
