@@ -114,6 +114,26 @@ function format(value){
     return value.toFixed(2);
 }
 
+function saveGame(){
+    localStorage.setItem("spaceFarmSave", JSON.stringify({
+        money,
+        production,
+        upgradeCost,
+        lastTime
+    }));
+}
+
+function loadGame(){
+    let save = localStorage.getItem("spaceFarmSave");
+    if(save){
+        let data = JSON.parse(save);
+        money = data.money;
+        production = data.production;
+        upgradeCost = data.upgradeCost;
+        lastTime = data.lastTime;
+    }
+}
+
 function updateUI(){
     document.getElementById("money").innerText = format(money);
     document.getElementById("upgradeCost").innerText = upgradeCost;
@@ -122,6 +142,7 @@ function updateUI(){
 function harvest(){
     money += production;
     updateUI();
+    saveGame();
 }
 
 function upgrade(){
@@ -130,6 +151,7 @@ function upgrade(){
         production *= 2;
         upgradeCost = Math.floor(upgradeCost * 1.8);
         updateUI();
+        saveGame();
     }
 }
 
@@ -143,14 +165,17 @@ function autoProduction(){
     money += production * seconds;
     lastTime = now;
     updateUI();
+    saveGame();
 }
 
 setInterval(function(){
     money += production;
     updateUI();
+    saveGame();
 },1000);
 
 window.onload = function(){
+    loadGame();
     autoProduction();
 }
 </script>
