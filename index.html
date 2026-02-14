@@ -86,6 +86,8 @@ button{
         Créditos: R$ <span id="money">0.00</span>
     </div>
 
+    <div>Produção por segundo: <span id="pps">0.5</span></div>
+
     <div class="dome"></div>
 
     <button class="primary" onclick="harvest()">
@@ -95,11 +97,11 @@ button{
     <br>
 
     <button class="secondary" onclick="upgrade()">
-        ⬆ Melhorar Produção (R$ <span id="upgradeCost">10</span>)
+        ⬆ Melhorar Produção (R$ <span id="upgradeCost">15</span>)
     </button>
 
     <div class="footer">
-        Produção automática ativada<br>
+        Economia estratégica ativada<br>
         Offline até 2 horas
     </div>
 </div>
@@ -107,7 +109,7 @@ button{
 <script>
 let money = 0;
 let production = 1;
-let upgradeCost = 10;
+let upgradeCost = 15;
 let lastTime = Date.now();
 
 function format(value){
@@ -136,7 +138,8 @@ function loadGame(){
 
 function updateUI(){
     document.getElementById("money").innerText = format(money);
-    document.getElementById("upgradeCost").innerText = upgradeCost;
+    document.getElementById("upgradeCost").innerText = Math.floor(upgradeCost);
+    document.getElementById("pps").innerText = format(production * 0.5);
 }
 
 function harvest(){
@@ -148,8 +151,8 @@ function harvest(){
 function upgrade(){
     if(money >= upgradeCost){
         money -= upgradeCost;
-        production *= 2;
-        upgradeCost = Math.floor(upgradeCost * 1.8);
+        production += 1; // crescimento linear
+        upgradeCost *= 1.6; // custo escala mais rápido
         updateUI();
         saveGame();
     }
@@ -158,18 +161,18 @@ function upgrade(){
 function autoProduction(){
     let now = Date.now();
     let seconds = (now - lastTime) / 1000;
-    let maxOffline = 7200; // 2 horas
+    let maxOffline = 7200;
     if(seconds > maxOffline){
         seconds = maxOffline;
     }
-    money += production * seconds;
+    money += (production * 0.5) * seconds;
     lastTime = now;
     updateUI();
     saveGame();
 }
 
 setInterval(function(){
-    money += production;
+    money += production * 0.5;
     updateUI();
     saveGame();
 },1000);
